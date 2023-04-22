@@ -27,9 +27,9 @@ namespace KitchenVariousFixes
         }
         protected override void OnUpdate()
         {
-            NativeArray<Entity> items = Items.ToEntityArray(Allocator.Temp);
-            NativeArray<CSplittableItem> splits = Items.ToComponentDataArray<CSplittableItem>(Allocator.Temp);
-            NativeArray<CSplittableDepletedDelay> delays = Items.ToComponentDataArray<CSplittableDepletedDelay>(Allocator.Temp);
+            using NativeArray<Entity> items = Items.ToEntityArray(Allocator.Temp);
+            using NativeArray<CSplittableItem> splits = Items.ToComponentDataArray<CSplittableItem>(Allocator.Temp);
+            using NativeArray<CSplittableDepletedDelay> delays = Items.ToComponentDataArray<CSplittableDepletedDelay>(Allocator.Temp);
 
             float dt = Time.DeltaTime;
 
@@ -56,10 +56,6 @@ namespace KitchenVariousFixes
                 delay.TimeRemaining -= dt;
                 Set(item, delay);
             }
-
-            items.Dispose();
-            splits.Dispose();
-            delays.Dispose();
         }
     }
 }

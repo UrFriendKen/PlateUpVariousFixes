@@ -1,6 +1,9 @@
-﻿using KitchenLib;
-using KitchenLib.Event;
+﻿using Kitchen;
+using KitchenData;
+using KitchenLib;
 using KitchenMods;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -23,11 +26,40 @@ namespace KitchenVariousFixes
 
         public static AssetBundle Bundle;
 
+        protected readonly Dictionary<int, int> ItemProviders = new Dictionary<int, int>();
+
         public Main() : base(MOD_GUID, MOD_NAME, MOD_AUTHOR, MOD_VERSION, MOD_GAMEVERSION, Assembly.GetExecutingAssembly()) { }
 
         protected override void OnInitialise()
         {
-            LogWarning($"{MOD_GUID} v{MOD_VERSION} in use!");
+            PopulateMissingDedicatedProviders();
+        }
+
+        private void PopulateMissingDedicatedProviders()
+        {
+            HashSet<int> checkedItems = new HashSet<int>() { 0 };
+            foreach (Appliance appliance in GameData.Main.Get<Appliance>())
+            {
+                IEnumerable<CItemProvider> providers = appliance.Properties.Where(property => property is CItemProvider).Cast<CItemProvider>();
+                if (providers.Count() == 0)
+                    continue;
+
+                CItemProvider provider = providers.First();
+                int itemId = provider.DefaultProvidedItem == 0? provider.ProvidedItem : provider.DefaultProvidedItem;
+                if (checkedItems.Contains(itemId))
+                    continue;
+
+                checkedItems.Add(itemId);
+
+                if (!GameData.Main.TryGet(itemId, out Item item, warn_if_fail: true))
+                    continue;
+
+                if (item.DedicatedProvider != null)
+                    continue;
+
+                item.DedicatedProvider = appliance;
+                Main.LogInfo($"Updated DedicatedProvider for {item.name} ({item.ID}) - {item.DedicatedProvider.name}");
+            }
         }
 
         protected override void OnUpdate()
