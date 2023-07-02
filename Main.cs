@@ -1,6 +1,6 @@
-﻿using Kitchen;
+﻿using HarmonyLib;
+using Kitchen;
 using KitchenData;
-using KitchenLib;
 using KitchenMods;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,29 +10,27 @@ using UnityEngine;
 // Namespace should have "Kitchen" in the beginning
 namespace KitchenVariousFixes
 {
-    public class Main : BaseMod, IModSystem
+    public class Main : IModInitializer
     {
-        // GUID must be unique and is recommended to be in reverse domain name notation
-        // Mod Name is displayed to the player and listed in the mods menu
-        // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.VariousFixes";
         public const string MOD_NAME = "VariousFixes";
-        public const string MOD_VERSION = "0.1.1";
-        public const string MOD_AUTHOR = "IcedMilo";
-        public const string MOD_GAMEVERSION = ">=1.1.5";
-        // Game version this mod is designed for in semver
-        // e.g. ">=1.1.3" current and all future
-        // e.g. ">=1.1.3 <=1.2.3" for all from/until
-
-        public static AssetBundle Bundle;
+        public const string MOD_VERSION = "0.1.2";
 
         protected readonly Dictionary<int, int> ItemProviders = new Dictionary<int, int>();
+        
+        Harmony harmony;
+        static List<Assembly> PatchedAssemblies = new List<Assembly>();
 
-        public Main() : base(MOD_GUID, MOD_NAME, MOD_AUTHOR, MOD_VERSION, MOD_GAMEVERSION, Assembly.GetExecutingAssembly()) { }
-
-        protected override void OnInitialise()
+        public Main()
         {
-            PopulateMissingDedicatedProviders();
+            if (harmony == null)
+                harmony = new Harmony(MOD_GUID);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            if (assembly != null && !PatchedAssemblies.Contains(assembly))
+            {
+                harmony.PatchAll(assembly);
+                PatchedAssemblies.Add(assembly);
+            }
         }
 
         private void PopulateMissingDedicatedProviders()
@@ -62,13 +60,18 @@ namespace KitchenVariousFixes
             }
         }
 
-        protected override void OnUpdate()
+        public void PostActivate(KitchenMods.Mod mod)
         {
+            LogWarning($"{MOD_GUID} v{MOD_VERSION} in use!");
         }
 
-        protected override void OnPostActivate(KitchenMods.Mod mod)
+        public void PreInject()
         {
+            PopulateMissingDedicatedProviders();
         }
+
+        public void PostInject() { }
+
         #region Logging
         public static void LogInfo(string _log) { Debug.Log($"[{MOD_NAME}] " + _log); }
         public static void LogWarning(string _log) { Debug.LogWarning($"[{MOD_NAME}] " + _log); }
