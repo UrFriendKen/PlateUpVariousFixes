@@ -14,7 +14,7 @@ namespace KitchenVariousFixes
     {
         public const string MOD_GUID = "IcedMilo.PlateUp.VariousFixes";
         public const string MOD_NAME = "VariousFixes";
-        public const string MOD_VERSION = "0.1.2";
+        public const string MOD_VERSION = "0.1.4";
 
         protected readonly Dictionary<int, int> ItemProviders = new Dictionary<int, int>();
         
