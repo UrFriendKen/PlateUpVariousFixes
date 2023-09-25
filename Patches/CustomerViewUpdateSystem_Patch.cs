@@ -10,26 +10,23 @@ using UnityEngine;
 namespace KitchenVariousFixes.Patches
 {
     [HarmonyPatch]
-    static class DespawnCustomerGroups_Patch
+    static class CustomerViewUpdateSystem_Patch
     {
-        static readonly Type TARGET_TYPE = typeof(DespawnCustomerGroups);
-        const bool IS_ORIGINAL_LAMBDA_BODY = false;
+        static readonly Type TARGET_TYPE = typeof(CustomerView.UpdateSystem);
+        const bool IS_ORIGINAL_LAMBDA_BODY = true;
         const int LAMBDA_BODY_INDEX = 0;
-        const string TARGET_METHOD_NAME = "OnUpdate";
-        const string DESCRIPTION = "Modify despawn bounds limits"; // Logging purpose of patch
+        const string TARGET_METHOD_NAME = "";
+        const string DESCRIPTION = "Modify leaving move target"; // Logging purpose of patch
 
         const int EXPECTED_MATCH_COUNT = 1;
 
         static readonly List<OpCode> OPCODES_TO_MATCH = new List<OpCode>()
         {
-            OpCodes.Ldloca,
-            OpCodes.Call,
+            OpCodes.Ldloca_S,
             OpCodes.Ldc_R4,
             OpCodes.Ldc_R4,
             OpCodes.Ldc_R4,
-            OpCodes.Newobj,
-            OpCodes.Newobj,
-            OpCodes.Stfld
+            OpCodes.Call
         };
 
         // null is ignore
@@ -39,28 +36,29 @@ namespace KitchenVariousFixes.Patches
 
         static readonly List<OpCode> MODIFIED_OPCODES = new List<OpCode>()
         {
-            OpCodes.Ldloca,
+            OpCodes.Nop,
+            OpCodes.Nop,
+            OpCodes.Nop,
             OpCodes.Call,
-            OpCodes.Nop,
-            OpCodes.Nop,
-            OpCodes.Nop,
-            OpCodes.Nop,
-            OpCodes.Nop,
-            OpCodes.Stfld
+            OpCodes.Stloc_1
         };
 
         // null is ignore
         static readonly List<object> MODIFIED_OPERANDS = new List<object>()
         {
             null,
-            typeof(DespawnCustomerGroups_Patch).GetMethod("GetBounds", BindingFlags.NonPublic | BindingFlags.Static)
+            null,
+            null,
+            typeof(CustomerViewUpdateSystem_Patch).GetMethod("GetLeavingTarget", BindingFlags.NonPublic | BindingFlags.Static),
+            null
         };
 
-        static Bounds GetBounds()
+        static Vector3 GetLeavingTarget()
         {
             PatchController.TryGetBounds(out var bounds);
-            Bounds newBounds = new Bounds(Vector3.zero, new Vector3(Mathf.Max(bounds.size.x + 4, 20f), 10f, Mathf.Max(bounds.size.z + 4, 20f)));
-            return newBounds;
+            Vector3 target = new Vector3(Mathf.Min(bounds.min.x - 7, -15f), 0f, 0f);
+            Main.LogWarning($"Target = {target.x}");
+            return target;
         }
 
         public static MethodBase TargetMethod()
