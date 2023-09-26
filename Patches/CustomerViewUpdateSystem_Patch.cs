@@ -57,7 +57,6 @@ namespace KitchenVariousFixes.Patches
         {
             PatchController.TryGetBounds(out var bounds);
             Vector3 target = new Vector3(Mathf.Min(bounds.min.x - 7, -15f), 0f, 0f);
-            Main.LogWarning($"Target = {target.x}");
             return target;
         }
 
