@@ -15,7 +15,7 @@ namespace KitchenVariousFixes
         {
             if (Bounds.Contains(SPerformTableUpdate.DefaultPathingSource))
             {
-                SPerformTableUpdate.DefaultPathingSource = new Vector3(Mathf.Min(Bounds.min.x - 7, -15f), 0f, 0f);
+                SPerformTableUpdate.DefaultPathingSource = GetFrontDoor(get_external_tile: true);
                 Main.LogInfo($"SPerformTableUpdate.DefaultPathingSource inside Bounds! Updated to {SPerformTableUpdate.DefaultPathingSource}");
             }
         }
