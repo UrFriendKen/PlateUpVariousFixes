@@ -62,7 +62,7 @@ namespace KitchenVariousFixes.Patches
 
         public static MethodBase TargetMethod()
         {
-            Type type = IS_ORIGINAL_LAMBDA_BODY ? AccessTools.FirstInner(TARGET_TYPE, t => t.Name.Contains($"c__DisplayClass_OnUpdate_LambdaJob{LAMBDA_BODY_INDEX}")) : TARGET_TYPE;
+            Type type = IS_ORIGINAL_LAMBDA_BODY ? AccessTools.FirstInner(TARGET_TYPE, t => t.Name.Contains($"<>c__DisplayClass_PopulateNewViewUpdates_LambdaJob{LAMBDA_BODY_INDEX}")) : TARGET_TYPE;
             return AccessTools.FirstMethod(type, method => method.Name.Contains(IS_ORIGINAL_LAMBDA_BODY ? "OriginalLambdaBody" : TARGET_METHOD_NAME));
         }
 
